@@ -178,13 +178,21 @@ folium_static(m, height=800, width=1600)  # Increased width for larger display
 # Display species legend in the sidebar
 with st.sidebar:
     st.write("### Species Legend")
-    for species, color in st.session_state.color_map.items():
-        if not selected_species or species in selected_species:
-            st.markdown(
-                f"<div style='display: flex; align-items: center; margin-bottom: 10px;'>"
-                f"<div style='width: 20px; height: 20px; background-color: {color}; "
-                f"border-radius: 50%; margin-right: 8px; flex-shrink: 0;'></div>"
-                f"<div style='font-size: 0.9em;'>{filtered_df[filtered_df['search_species'] == species]['common'].iloc[0]}<br>"
-                f"<small><i>{species}</i></small></div></div>",
-                unsafe_allow_html=True
-            )
+    if not selected_species:
+        st.info("Select species from above to see their observations on the map")
+    else:
+        for species, color in st.session_state.color_map.items():
+            if species in selected_species:
+                display_name = st.session_state.species_display[species]
+                common_name = display_name.split(' (')[0]  # Extract common name from display name
+                # Only show the legend item if we have data for this species
+                species_data = st.session_state.data[st.session_state.data['search_species'] == species]
+                if not species_data.empty:
+                    st.markdown(
+                        f"<div style='display: flex; align-items: center; margin-bottom: 10px;'>"
+                        f"<div style='width: 20px; height: 20px; background-color: {color}; "
+                        f"border-radius: 50%; margin-right: 8px; flex-shrink: 0;'></div>"
+                        f"<div style='font-size: 0.9em;'>{common_name}<br>"
+                        f"<small><i>{species}</i></small></div></div>",
+                        unsafe_allow_html=True
+                    )
